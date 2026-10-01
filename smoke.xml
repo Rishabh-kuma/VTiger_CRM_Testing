@@ -1,0 +1,14 @@
+<suite name = "smoke-suit">
+	<groups>
+		<run>
+			<include name="smoke" />
+		</run>
+	</groups>
+	<test name="test1">
+		<classes>
+			<class name="types_of_executions.OrgTest" />
+			<class name="types_of_executions.ContactTest" />
+			<class name="types_of_executions.LeadTest" />
+		</classes>
+	</test>
+</suite>

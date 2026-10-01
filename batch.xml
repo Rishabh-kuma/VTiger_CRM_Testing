@@ -1,0 +1,13 @@
+<suite name="batch-suite">
+	<test name="test1">
+		<classes>
+			<class name="types_of_executions.OrgTest" />
+			<class name="types_of_executions.ContactTest">
+				<methods>
+					<include name="modifyContactTest" />
+				</methods>
+			</class>
+			<class name="types_of_executions.LeadTest" />
+		</classes>
+	</test>
+</suite>
