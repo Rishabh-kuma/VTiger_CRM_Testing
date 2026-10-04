@@ -1,4 +1,4 @@
-package Contact;
+package contact_repo;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -12,9 +12,10 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.testng.Reporter;
 import org.testng.annotations.Test;
 
-import contact_repo.ContactModule;
 import generic_utility.FileUtility;
 import generic_utility.WebDriverUtility;
+import logIn_SignOut.LogIn;
+import logIn_SignOut.SignOut;
 
 /**
  * Test Class: CreateContactTest
@@ -55,7 +56,7 @@ public class CreateContactTest {
 		Reporter.log("==============================================", true);
 		Reporter.log("       CREATE ORGANIZATION TEST STARTED       ", true);
 		Reporter.log("==============================================", true);
-		
+
 		// ============================================================
 		// STEP 1: OPEN THE BROWSER
 		// ============================================================
@@ -88,14 +89,17 @@ public class CreateContactTest {
 		driver.get(url);
 		Reporter.log("[INFO] Application launched successfully.", true);
 
+		LogIn login = new LogIn(driver);
+		Create fields = new Create(driver);
+		Verification verify = new Verification(driver);
+		SignOut profile = new SignOut(driver);
+
 		// ============================================================
 		// STEP 2: LOGIN
 		// ============================================================
 
-		ContactModule fields = new ContactModule(driver);
-
-		WebElement usernameField = fields.getUsernameField();
-		WebElement passwordField = fields.getPasswordField();
+		WebElement usernameField = login.getUsernameField();
+		WebElement passwordField = login.getPasswordField();
 
 		driver.navigate().refresh();
 
@@ -255,16 +259,16 @@ public class CreateContactTest {
 
 		Reporter.log("Step 6: Verifying Contact creation...");
 		// fetch actual Last name from contact details page
-		String actLastName = fields.getActLNameField().getText();
+		String actLastName = verify.getActLNameField().getText();
 
 		// fetch actual Email from contact details page
-		String actEmail = fields.getActEmailField().getText();
+		String actEmail = verify.getActEmailField().getText();
 
 		// fetch actual Assistant from contact details page
-		String actAstnt = fields.getActAstsnField().getText();
+		String actAstnt = verify.getActAstsnField().getText();
 
 		// fetch actual DOB from contact details page
-		String actDob = fields.getActDobField().getText();
+		String actDob = verify.getActDobField().getText();
 
 		Reporter.log("Expected Last Name: " + lName, true);
 		Reporter.log("Actual Last Name: " + actLastName, true);
@@ -292,17 +296,17 @@ public class CreateContactTest {
 
 		Reporter.log("Step 7: Starting logout process...", true);
 
-		WebElement profile = fields.getProfileField();
+		WebElement profileIcon = profile.getProfileField();
 
 		Reporter.log("Profile icon located successfully.", true);
 
 		Reporter.log("Actions object created successfully.", true);
 
-		wdUtil.hover(profile);
+		wdUtil.hover(profileIcon);
 
 		Reporter.log("Mouse hovered over profile icon.", true);
 
-		fields.getSignOutField().click();
+		profile.getSignOutField().click();
 
 		Reporter.log("Sign Out option clicked successfully.", true);
 
