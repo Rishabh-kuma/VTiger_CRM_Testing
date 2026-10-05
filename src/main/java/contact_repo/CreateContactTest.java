@@ -2,6 +2,7 @@ package contact_repo;
 
 import java.io.IOException;
 import java.time.Duration;
+
 import org.json.simple.parser.ParseException;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
@@ -12,28 +13,17 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.testng.Reporter;
 import org.testng.annotations.Test;
 
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.Status;
+import com.aventstack.extentreports.reporter.ExtentSparkReporter;
+import com.aventstack.extentreports.reporter.configuration.Theme;
+
 import generic_utility.FileUtility;
+import generic_utility.JavaUtility;
 import generic_utility.WebDriverUtility;
 import logIn_SignOut.LogIn;
 import logIn_SignOut.SignOut;
-
-/**
- * Test Class: CreateContactTest
- *
- * Description: This automation script verifies the complete flow of creating a
- * new Contact in the Vtiger CRM application.
- *
- * Test Flow: 1. Launch Chrome browser 2. Maximize browser window 3. Configure
- * implicit wait 4. Open Vtiger application 5. Login using valid credentials 6.
- * Navigate to Contacts module 7. Open Create Contact page 8. Enter Last Name 9.
- * Save the contact 10. Verify the created contact 11. Logout from Vtiger 12.
- * Close the browser
- *
- * Expected Result: Contact should be created successfully with the entered Last
- * Name and the user should be able to logout successfully.
- *
- * Author: Rishabh Application: Vtiger CRM
- */
 
 public class CreateContactTest {
 
@@ -64,6 +54,7 @@ public class CreateContactTest {
 		Reporter.log("[INFO] Launching Chrome browser...", true);
 
 		WebDriver driver = null;
+
 		if (browser.equals("chrome")) {
 			driver = new ChromeDriver();
 			Reporter.log("Chrome browser oppenned successfully", true);
@@ -95,6 +86,27 @@ public class CreateContactTest {
 		SignOut profile = new SignOut(driver);
 
 		// ============================================================
+		// EXTENT REPORT CONFIGURATION
+		// ============================================================
+
+		String time = JavaUtility.getCurrentDateTime();
+
+		ExtentSparkReporter spark = new ExtentSparkReporter("./ad_reports/" + time + ".html");
+
+		spark.config().setDocumentTitle("Vtiger CRM Reports");
+		spark.config().setReportName("Login Reports");
+		spark.config().setTheme(Theme.DARK);
+
+		ExtentReports report = new ExtentReports();
+		report.attachReporter(spark);
+
+		report.setSystemInfo("browser", browser);
+		report.setSystemInfo("application", "Vtiger CRM");
+
+		// Creates report for Login
+		ExtentTest test = report.createTest("Login");
+
+		// ============================================================
 		// STEP 2: LOGIN
 		// ============================================================
 
@@ -104,18 +116,29 @@ public class CreateContactTest {
 		driver.navigate().refresh();
 
 		Reporter.log("Step 2: Starting login process...", true);
+		test.log(Status.INFO, "Starting login process...");
 
 		Reporter.log("Username and password fields located successfully.", true);
+		test.log(Status.INFO, "Username and password fields located successfully.");
 
 		usernameField.sendKeys(username);
 
 		Reporter.log("Username entered successfully.", true);
+		test.log(Status.INFO, "Username entered successfully.");
 
 		passwordField.sendKeys(password + Keys.ENTER);
 
 		Reporter.log("Password entered and login submitted.", true);
+		test.log(Status.INFO, "Password entered and login submitted.");
 
 		Reporter.log("Login process completed.", true);
+		test.log(Status.PASS, "Login completed successfully.");
+
+		// ============================================================
+		// BACKUP EXTENT REPORT
+		// ============================================================
+
+		report.flush();
 
 		// ============================================================
 		// STEP 3: CREATE CONTACT
@@ -145,10 +168,6 @@ public class CreateContactTest {
 		// ============================================================
 		// STEP 4: FILLING CONTACT FORM
 		// ============================================================
-
-		// ------------------------------------------------------------
-		// Adding last name
-		// ------------------------------------------------------------
 
 		Reporter.log("Step 4: Filling Contact form...", true);
 
@@ -258,16 +277,13 @@ public class CreateContactTest {
 		// ============================================================
 
 		Reporter.log("Step 6: Verifying Contact creation...");
-		// fetch actual Last name from contact details page
+
 		String actLastName = verify.getActLNameField().getText();
 
-		// fetch actual Email from contact details page
 		String actEmail = verify.getActEmailField().getText();
 
-		// fetch actual Assistant from contact details page
 		String actAstnt = verify.getActAstsnField().getText();
 
-		// fetch actual DOB from contact details page
 		String actDob = verify.getActDobField().getText();
 
 		Reporter.log("Expected Last Name: " + lName, true);
@@ -325,6 +341,5 @@ public class CreateContactTest {
 		Reporter.log("Browser closed successfully.", true);
 
 		Reporter.log("========== TEST EXECUTION COMPLETED ==========", true);
-
 	}
 }
