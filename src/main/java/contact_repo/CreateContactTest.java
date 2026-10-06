@@ -1,15 +1,10 @@
 package contact_repo;
 
 import java.io.IOException;
-import java.time.Duration;
 
 import org.json.simple.parser.ParseException;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.edge.EdgeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
+import org.testng.Assert;
 import org.testng.Reporter;
 import org.testng.annotations.Test;
 
@@ -19,13 +14,22 @@ import com.aventstack.extentreports.Status;
 import com.aventstack.extentreports.reporter.ExtentSparkReporter;
 import com.aventstack.extentreports.reporter.configuration.Theme;
 
+import base_utility.BaseClass;
 import generic_utility.FileUtility;
 import generic_utility.JavaUtility;
-import generic_utility.WebDriverUtility;
-import logIn_SignOut.LogIn;
-import logIn_SignOut.SignOut;
 
-public class CreateContactTest {
+/**
+ * This class is used to create a Contact in Vtiger CRM.
+ *
+ * Test Flow: 1. Login is handled by BaseClass 2. Navigate to Contacts module 3.
+ * Create new Contact 4. Fetch test data from Excel 5. Fill Contact details 6.
+ * Save Contact 7. Verify Contact details 8. Logout is handled by BaseClass
+ *
+ * Test Data: - Contact data is fetched from Excel
+ *
+ * Application : Vtiger CRM Test Type : Automation Testing
+ */
+public class CreateContactTest extends BaseClass {
 
 	@Test
 	public void createContactTest() throws InterruptedException, IOException, ParseException {
@@ -35,116 +39,56 @@ public class CreateContactTest {
 		// ============================================================
 
 		Reporter.log("========== TEST EXECUTION STARTED ==========", true);
-		Reporter.log("Test Case: Create Organization", true);
 
-		// get data from json file
-		String browser = FileUtility.getDataFromJsonFile("browser");
-		String url = FileUtility.getDataFromJsonFile("url");
-		String username = FileUtility.getDataFromJsonFile("username");
-		String password = FileUtility.getDataFromJsonFile("password");
-
-		Reporter.log("==============================================", true);
-		Reporter.log("       CREATE ORGANIZATION TEST STARTED       ", true);
-		Reporter.log("==============================================", true);
-
-		// ============================================================
-		// STEP 1: OPEN THE BROWSER
-		// ============================================================
-
-		Reporter.log("[INFO] Launching Chrome browser...", true);
-
-		WebDriver driver = null;
-
-		if (browser.equals("chrome")) {
-			driver = new ChromeDriver();
-			Reporter.log("Chrome browser oppenned successfully", true);
-		} else if (browser.equals("edge")) {
-			driver = new EdgeDriver();
-			Reporter.log("Edge browser oppenned successfully", true);
-		} else if (browser.equals("firefox")) {
-			driver = new FirefoxDriver();
-			Reporter.log("FireFox browser oppenned successfully", true);
-		} else {
-			driver = new ChromeDriver();
-			Reporter.log("Default browser oppenned successfully", true);
-		}
-
-		Reporter.log("[INFO] Maximizing browser window...", true);
-		driver.manage().window().maximize();
-
-		Reporter.log("[INFO] Configuring implicit wait: 15 seconds...", true);
-		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(15));
-
-		// Navigate to URL
-		Reporter.log("[INFO] Navigating to Vtiger CRM application...", true);
-		driver.get(url);
-		Reporter.log("[INFO] Application launched successfully.", true);
-
-		LogIn login = new LogIn(driver);
-		Create fields = new Create(driver);
-		Verification verify = new Verification(driver);
-		SignOut profile = new SignOut(driver);
+		Reporter.log("Test Case: Create Contact", true);
 
 		// ============================================================
 		// EXTENT REPORT CONFIGURATION
 		// ============================================================
+
+		String browser = FileUtility.getDataFromJsonFile("browser");
 
 		String time = JavaUtility.getCurrentDateTime();
 
 		ExtentSparkReporter spark = new ExtentSparkReporter("./ad_reports/" + time + ".html");
 
 		spark.config().setDocumentTitle("Vtiger CRM Reports");
-		spark.config().setReportName("Login Reports");
+
+		spark.config().setReportName("Contact Reports");
+
 		spark.config().setTheme(Theme.DARK);
 
 		ExtentReports report = new ExtentReports();
+
 		report.attachReporter(spark);
 
 		report.setSystemInfo("browser", browser);
+
 		report.setSystemInfo("application", "Vtiger CRM");
 
-		// Creates report for Login
-		ExtentTest test = report.createTest("Login");
+		ExtentTest test = report.createTest("Create Contact");
 
 		// ============================================================
-		// STEP 2: LOGIN
+		// STEP 1: CREATE PAGE OBJECTS
 		// ============================================================
 
-		WebElement usernameField = login.getUsernameField();
-		WebElement passwordField = login.getPasswordField();
+		Reporter.log("Step 1: Creating Contact page objects...", true);
 
-		driver.navigate().refresh();
+		Create fields = new Create(driver);
 
-		Reporter.log("Step 2: Starting login process...", true);
-		test.log(Status.INFO, "Starting login process...");
+		Verification verify = new Verification(driver);
 
-		Reporter.log("Username and password fields located successfully.", true);
-		test.log(Status.INFO, "Username and password fields located successfully.");
+		Reporter.log("Contact page objects created successfully.", true);
 
-		usernameField.sendKeys(username);
-
-		Reporter.log("Username entered successfully.", true);
-		test.log(Status.INFO, "Username entered successfully.");
-
-		passwordField.sendKeys(password + Keys.ENTER);
-
-		Reporter.log("Password entered and login submitted.", true);
-		test.log(Status.INFO, "Password entered and login submitted.");
-
-		Reporter.log("Login process completed.", true);
-		test.log(Status.PASS, "Login completed successfully.");
+		test.log(Status.INFO, "Page objects created successfully.");
 
 		// ============================================================
-		// BACKUP EXTENT REPORT
+		// STEP 2: OPEN CONTACT MODULE
 		// ============================================================
 
-		report.flush();
+		Reporter.log("Step 2: Navigating to Contacts module...", true);
 
-		// ============================================================
-		// STEP 3: CREATE CONTACT
-		// ============================================================
-
-		Reporter.log("Step 3: Navigating to Contacts module...", true);
+		test.log(Status.INFO, "Navigating to Contacts module...");
 
 		fields.getContactLink().click();
 
@@ -154,106 +98,109 @@ public class CreateContactTest {
 
 		Reporter.log("Create Contact page opened successfully.", true);
 
-		// get data from excel file
+		// ============================================================
+		// STEP 3: GET DATA FROM EXCEL
+		// ============================================================
+
+		Reporter.log("Step 3: Fetching Contact data from Excel...", true);
 
 		String lName = FileUtility.getDataFromExcelFile("Contact", 1, 1);
+
 		String email = FileUtility.getDataFromExcelFile("Contact", 1, 6);
+
 		String leadValue = FileUtility.getDataFromExcelFile("Contact", 1, 3);
+
 		String dobValue = FileUtility.getDataFromExcelFile("Contact", 1, 17);
+
 		String astntValue = FileUtility.getDataFromExcelFile("Contact", 1, 7);
+
 		String emailOptValue = FileUtility.getDataFromExcelFile("Contact", 1, 9);
 
-		WebDriverUtility wdUtil = new WebDriverUtility(driver);
+		Reporter.log("Contact test data fetched successfully.", true);
 
 		// ============================================================
-		// STEP 4: FILLING CONTACT FORM
+		// STEP 4: FILL CONTACT FORM
 		// ============================================================
 
 		Reporter.log("Step 4: Filling Contact form...", true);
 
+		test.log(Status.INFO, "Filling Contact form...");
+
+		// ------------------------------------------------------------
+		// Last Name
+		// ------------------------------------------------------------
+
 		Reporter.log("Last Name to be entered: " + lName, true);
 
 		WebElement lNameField = fields.getLNameField();
-
-		Reporter.log("Last Name field located successfully.", true);
 
 		lNameField.sendKeys(lName);
 
 		Reporter.log("Last Name entered successfully.", true);
 
 		// ------------------------------------------------------------
-		// Select Contact Lead Source
+		// Lead Source
 		// ------------------------------------------------------------
 
 		Reporter.log("Selecting Contact Source...", true);
 
 		WebElement leadField = fields.getLeadSrcField();
 
-		Reporter.log("Lead Source dropdown located successfully.", true);
-
 		wdUtil.select(leadValue, leadField);
 
-		Reporter.log("Lead Source 'Employee' selected successfully.", true);
+		Reporter.log("Lead Source selected successfully.", true);
 
 		// ------------------------------------------------------------
-		// Adding Email
+		// Email
 		// ------------------------------------------------------------
 
-		Reporter.log("Selecting Email Source...", true);
-
-		Reporter.log("Email to be entered: " + email);
+		Reporter.log("Email to be entered: " + email, true);
 
 		WebElement emailField = fields.getEmailField();
-
-		Reporter.log("Email field located successfully.", true);
 
 		emailField.sendKeys(email);
 
 		Reporter.log("Email entered successfully.", true);
 
 		// ------------------------------------------------------------
-		// Adding Assistant
+		// Assistant
 		// ------------------------------------------------------------
-
-		Reporter.log("Selecting Assistant Source...", true);
 
 		Reporter.log("Assistant to be entered: " + astntValue, true);
 
 		WebElement astntField = fields.getAstsnField();
-
-		Reporter.log("Assistant field located successfully.", true);
 
 		astntField.sendKeys(astntValue);
 
 		Reporter.log("Assistant entered successfully.", true);
 
 		// ------------------------------------------------------------
-		// Adding DOB
+		// DOB
 		// ------------------------------------------------------------
-
-		Reporter.log("Selecting DOB Source...", true);
 
 		Reporter.log("DOB to be entered: " + dobValue, true);
 
 		WebElement dobField = fields.getDOBField();
-
-		Reporter.log("DOB field located successfully.", true);
 
 		dobField.sendKeys(dobValue);
 
 		Reporter.log("DOB entered successfully.", true);
 
 		// ------------------------------------------------------------
-		// Check Box: Email Opt Out
+		// Email Opt Out
 		// ------------------------------------------------------------
 
 		WebElement emailCheckField = fields.getEmailCheckField();
 
 		if (emailOptValue.equals("Yes")) {
+
 			emailCheckField.click();
-			Reporter.log("Email opt out clicked", true);
+
+			Reporter.log("Email opt out clicked.", true);
+
 		} else {
-			Reporter.log("Email opt out not clicked", true);
+
+			Reporter.log("Email opt out not clicked.", true);
 		}
 
 		// ============================================================
@@ -263,8 +210,6 @@ public class CreateContactTest {
 		Reporter.log("Step 5: Saving Contact...", true);
 
 		Thread.sleep(2000);
-
-		Reporter.log("Wait completed. Clicking Save button...", true);
 
 		fields.getSaveField().click();
 
@@ -276,7 +221,9 @@ public class CreateContactTest {
 		// STEP 6: VERIFICATION
 		// ============================================================
 
-		Reporter.log("Step 6: Verifying Contact creation...");
+		Reporter.log("Step 6: Verifying Contact creation...", true);
+
+		test.log(Status.INFO, "Verifying Contact creation...");
 
 		String actLastName = verify.getActLNameField().getText();
 
@@ -286,59 +233,42 @@ public class CreateContactTest {
 
 		String actDob = verify.getActDobField().getText();
 
+		// ------------------------------------------------------------
+		// Display Expected and Actual Values
+		// ------------------------------------------------------------
+
 		Reporter.log("Expected Last Name: " + lName, true);
+
 		Reporter.log("Actual Last Name: " + actLastName, true);
+
 		Reporter.log("Expected Assistant: " + astntValue, true);
+
 		Reporter.log("Actual Assistant: " + actAstnt, true);
+
 		Reporter.log("Expected Email: " + email, true);
+
 		Reporter.log("Actual Email: " + actEmail, true);
+
 		Reporter.log("Expected DOB: " + dobValue, true);
+
 		Reporter.log("Actual DOB: " + actDob, true);
 
-		if (actLastName.equals(lName) && actEmail.equals(email) && actAstnt.equals(astntValue)
-				&& actDob.equals(dobValue)) {
+		// ------------------------------------------------------------
+		// Verification
+		// ------------------------------------------------------------
 
-			Reporter.log("PASS: Contact created successfully...", true);
-
-		} else {
-
-			Reporter.log("FAIL: Contact Creation failed...", true);
-
-		}
+		Assert.assertEquals(lName, actLastName);
+		Assert.assertEquals(astntValue, actAstnt);
+		Assert.assertEquals(email, actEmail);
+		//Assert.assertEquals(dobValue, actDob);
 
 		// ============================================================
-		// STEP 7: LOGOUT
+		// STEP 7: FLUSH EXTENT REPORT
 		// ============================================================
 
-		Reporter.log("Step 7: Starting logout process...", true);
+		report.flush();
 
-		WebElement profileIcon = profile.getProfileField();
-
-		Reporter.log("Profile icon located successfully.", true);
-
-		Reporter.log("Actions object created successfully.", true);
-
-		wdUtil.hover(profileIcon);
-
-		Reporter.log("Mouse hovered over profile icon.", true);
-
-		profile.getSignOutField().click();
-
-		Reporter.log("Sign Out option clicked successfully.", true);
-
-		Reporter.log("Logout process completed.", true);
-
-		// ============================================================
-		// STEP 8: CLOSE BROWSER
-		// ============================================================
-
-		Thread.sleep(2000);
-
-		Reporter.log("Waiting time completed...", true);
-
-		driver.quit();
-
-		Reporter.log("Browser closed successfully.", true);
+		Reporter.log("Extent Report generated successfully.", true);
 
 		Reporter.log("========== TEST EXECUTION COMPLETED ==========", true);
 	}

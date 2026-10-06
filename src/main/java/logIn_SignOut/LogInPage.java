@@ -5,13 +5,23 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
-public class LogIn {
 
-	public LogIn(WebDriver driver) {
+/**
+ * Page Object Model class for Vtiger CRM Login page.
+ *
+ * Application : Vtiger CRM
+ * Page        : Login Page
+ */
+public class LogInPage {
+
+	public LogInPage(WebDriver driver) {
 		PageFactory.initElements(driver, this);
 	}
 
-	// <--------------------------- Declarations --------------------------->
+
+	// ============================================================
+	// DECLARATIONS
+	// ============================================================
 
 	@FindBy(name = "user_name")
 	private WebElement usernameField;
@@ -19,14 +29,17 @@ public class LogIn {
 	@FindBy(name = "user_password")
 	private WebElement passwordField;
 
-	// <--------------------------- Constructors --------------------------->
+
+	// ============================================================
+	// GETTERS
+	// ============================================================
 
 	public WebElement getUsernameField() {
 		return usernameField;
 	}
 
+
 	public WebElement getPasswordField() {
 		return passwordField;
-	}	
-
+	}
 }

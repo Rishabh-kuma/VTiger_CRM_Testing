@@ -39,6 +39,10 @@ public class WebDriverUtility {
 		sel.selectByVisibleText(visibleText);
 	}
 	
+	public void windowMax() {
+		driver.manage().window().maximize();
+	}
+	
 //	window handling
 	
 	public void switchToWindowByTitle(String partialTitle) {
